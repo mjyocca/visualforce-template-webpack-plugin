@@ -1,0 +1,13 @@
+<apex:page>
+    <head>
+        <!--%css%-->
+        <!--%css%-->
+    </head>
+    <div id="root"/>
+    <script>
+        var foo = 'foo';
+    </script>
+    <!--%scripts%-->
+    <script src="{!URLFOR($Resource.dist, 'page.bundle.test.js')}"/>
+    <!--%scripts%-->
+</apex:page>

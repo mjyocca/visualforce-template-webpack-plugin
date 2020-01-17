@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "properties": {
+        "entry": {
+            "description": "Name of entry configuration key name. Needs to match your webpack config",
+            "anyOf": [
+                { "type": "array" },
+                { "type": "string" }
+            ]
+        },
+        "page": {
+            "description": "Relative path to your visualforce page",
+            "type": "string"
+        },
+        "scriptHook": {
+            "descriptions": "Function to hook into modifying src and other attributes on script tag",
+            "instanceof": "Function"
+        },
+        "linkHook": {
+            "description": "Function to hook into modifying attributes of link tags",
+            "instanceof": "Function"
+        }
+    },
+    "additionalProperties": false
+}

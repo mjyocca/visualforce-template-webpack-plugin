@@ -1,0 +1,29 @@
+<apex:page applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" standardStylesheets="true" sidebar="false" showHeader="false" controller="MyController"> 
+    <head>
+        <!--%css%-->
+        <!--%css%-->
+    </head>
+    <body>
+        <apex:form>
+            <apex:pageBlock title="My Content" mode="edit">
+                <apex:pageBlockButtons>
+                    <apex:commandButton action="{!save}" value="Save"/>
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection title="My Content Section" columns="2">
+                    <apex:inputField value="{!account.name}"/>
+                    <apex:inputField value="{!account.site}"/>
+                    <apex:inputField value="{!account.type}"/>
+                    <apex:inputField value="{!account.accountNumber}"/>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+        <div id="root"/>
+
+        <script>
+            var some = 'unsaved important work '
+        </script>
+
+        <!--%scripts%-->
+        <!--%scripts%-->
+    </body>
+</apex:page>
