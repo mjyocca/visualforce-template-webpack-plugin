@@ -1,8 +1,8 @@
 <apex:page applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" standardStylesheets="true" sidebar="false" showHeader="false" controller="MyController"> 
     <head>
-        <!--%css%-->
+        <!--% styles %-->
         <link rel="stylesheet" type="text/css" href="{!$Resource.main_styles}"/>
-        <!--%css%-->
+        <!--% styles %-->
     </head>
     <body>
         <apex:form>
@@ -23,9 +23,9 @@
         <script>
         var some = 'unsaved important work '
         </script>
-        <!--%scripts%-->
+        <!--% scripts %-->
         <script type="text/javascript" src="{!URLFOR($Resource.vendors_admin~main_react_dom, 'vendors_admin~main_react_dom.bundle.js')}"/>
         <script type="text/javascript" src="{!URLFOR($Resource.main, 'main.bundle.js')}"/>
-        <!--%scripts%-->
+        <!--% scripts %-->
     </body>
 </apex:page>

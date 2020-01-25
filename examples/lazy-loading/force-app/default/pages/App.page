@@ -1,7 +1,7 @@
 <apex:page applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" standardStylesheets="true" sidebar="false" showHeader="false" controller="MyController"> 
     <head>
-        <!--%css%-->
-        <!--%css%-->
+        <!--% styles %-->
+        <!--% styles %-->
     </head>
     <body>
         <apex:form>
@@ -27,7 +27,7 @@
                 return dynamicImportUrl;
             }
         </script>
-        <!--%scripts%-->
-        <!--%scripts%-->
+        <!--% scripts %-->
+        <!--% scripts %-->
     </body>
 </apex:page>

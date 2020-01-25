@@ -30,6 +30,7 @@ const webpackBundleReducer = (entrypoints) => {
  * @returns {*} object w/ { page, entryPoints, assets }
  */
 const createMetaData = (pluginOptions, entrypoints) => {
+  if(!Array.isArray(pluginOptions)) pluginOptions = [pluginOptions]
 	const webpackEntryNames = Array.from(entrypoints.keys())
 	const webpackEntryFiles = webpackBundleReducer(entrypoints);
 	const metaData = pluginOptions
