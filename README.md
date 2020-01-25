@@ -11,10 +11,7 @@ npm i visualforce-template-webpack-plugin --save-dev
 <!-- * Backup your visualforce pages w/ git or some other tracking mechanizm before conducting a test run.
 A lof of html parsing engines do not like the apex namespace tags. Fortunately the one used in this plugin respects the non standard html tags. 
 * A lot of admins and devs rely on sandbox development where the org is the source of truth, which is the reason for these warnings. -->
-* Do not put anything between  `<!--%scripts%--><!--%scripts%-->` comment tags. They will be <span style="color:red;">erased!!</span>
-# Usage
-Since Visualforce has server side templating and a lot of your source needs to be placed inline w/ in your page, integrating with modern javascript tooling becomes cumbersome. 
-
+* Do not put anything between  `<!--% scripts %--><!--% scripts %-->` comment tags. They will be <span style="color:red;">erased!!</span>
 
 # Configuration
 
@@ -27,17 +24,20 @@ const VisualforcePlugin = require('visualforce-template-webpack-plugin')
 
 <h3 align="">Step 2: Visualforce Template Declaration</h3>
 
-#### In your Visualforce Page, you need to declare where you want the assets to autopopulate.<br/>
-`%scripts%` for your js files and `%css%` for your css files
+#### In your Visualforce Page, you need to declare where you want the assets to generate.<br/>
+`% scripts %` for your js files and `% styles %` for your css files
 <br/>
+
+#### Spacing does not matter
+`<!--%scripts%-->`, `<!--% scripts %-->`, or `<!-- % scripts % -->`
 
 **App.page**
 ```html
 <apex:page>
     <head>
-        <!--%css%-->
+        <!--% styles %-->
         <!-- WARNING: Do NOT Put anything [HERE]. Will get erased -->
-        <!--%css%-->
+        <!--% styles %-->
     </head>
     <body>
         <apex:form>
@@ -46,9 +46,9 @@ const VisualforcePlugin = require('visualforce-template-webpack-plugin')
         <script>
             //put non webpack/global javascript here
         </script>
-        <!--%scripts%-->
+        <!--% scripts %-->
         <!-- WARNING: Do NOT Put anything [HERE]. Will get erased -->
-        <!--%scripts%-->
+        <!--% scripts %-->
     </body>
 </apex:page>
 ```
@@ -82,12 +82,37 @@ module.exports = {
 
 |Name|Type|Default|Required|Description|
 |:--:|:--:|:-----:|:--:|:----------|
-|**`entry`**|`{String} or {Array}`|`main`|`false`|Name of entry configuration key name. Needs to match your webpack config|
+|**`entry`**|`{String} or {Array} of strings`|`main`|`false`|Name of entry configuration key name. Needs to match your webpack config entry names. Defaults to all entrypoint assets if none specified.|
 |**`page`**|`{String}`|`undefined`|`true`|Relative path to your visualforce page or component file|
 |**`scriptHook`**|`{Function}`|`undefined`|false|Callback function to modify `src` and other attributes on script tag|
-|**`linkHook`**|`{Function}`|`undefined`|false|Function to hook into modifying attributes of link tags|
+|**`styleHook`**|`{Function}`|`undefined`|false|Function to hook into modifying attributes of link tags|
 
+<br/>
+<h2 align="center">Additional Option Info</h2>
 
+*You can filter out entrypoint assets you wish to not include in the page*. 
+
+**webpack.config.js**
+```js
+modules.exports = {
+    entry: {
+        app: './app.js',
+        main: './main.js',
+        mobile: './mobile.js'
+    },
+    output: {
+        filename: '[name].bundle.js',
+        path: path.resolve(__dirname, "force-app/main/default/staticresources/dist"),
+    },
+    plugins: [
+        new VisualforceTemplate({
+            entry: ['app', 'main'],  // mobile entry is not included
+            page: path.resolve(__dirname, 'force-app/main/default/pages/App.page')
+        })
+    ]
+}
+```
+<br/>
 <h2 align="center">Script Function Hooks Details</h2>
 
 #### Script Tag Attribute Defaults
@@ -124,7 +149,7 @@ new VisualforcePlugin({
         scriptHook: ({ resourceName, resourceFilePath }) => {
             // ...
             return {
-                src: `{!URLFOR($Resource.${root}, '${fileName}')}`
+                src: `{!URLFOR($Resource.${resourceName}, '${resourceFilePath}')}`,
                 type: 'text/javascript'
             }
         }
@@ -135,7 +160,7 @@ new VisualforcePlugin({
 new VisualforcePlugin({
         entry: 'app',
         page: path.resolve(__dirname, "./force-app/default/main/pages/App.page"),
-        linkHook: ({ resourceName, resourceFilePath }) => {
+        styleHook: ({ resourceName, resourceFilePath }) => {
             return {
                 rel: 'stylesheet',
                 href: ``,
@@ -177,8 +202,8 @@ module.exports = {
     ...
     </apex:pageBlock>
     ...
-    <!--%scripts%-->
-    <!--%scripts%-->
+    <!--% scripts %-->
+    <!--% scripts %-->
 </apex:page>
 ```
 
@@ -190,9 +215,9 @@ module.exports = {
     ...
     </apex:pageBlock>
     ...
-    <!--%scripts%-->
+    <!--% scripts %-->
     <script type="text/javascript" src="{!$Resource.dist, 'bundle.js')}"></script>
-    <!--%scripts%-->
+    <!--% scripts %-->
 </apex:page>
 ```
 ---
@@ -206,11 +231,11 @@ then your page might result in
     <apex:pageBlock>
     </apex:pageBlock>
     ...
-    <!--%scripts%-->
+    <!--% scripts %-->
     <script type="text/javascript" src="{!$Resource.dist, 'polyfill.js')}"></script>
     <script type="text/javascript" src="{!$Resource.dist, 'vendor.js')}"></script>
     <script type="text/javascript" src="{!$Resource.dist, 'bundle.js')}"></script>
-    <!--%scripts%-->
+    <!--% scripts %-->
 </apex:page>
 ```
 ---
@@ -317,17 +342,17 @@ new VisualForceTemplatePlugin({
 
 Output **App.page**
 ```html
-<!--%scripts%-->
+<!--% scripts %-->
 <script type="text/javascript" src="https://mjyocca.ngrok.io/vendors_admin~main_react_dom/vendors_admin~main_react_dom.bundle.js"></script>
 <script type="text/javascript" src="https://mjyocca.ngrok.io/main/main.bundle.js"></script>
-<!--%scripts%-->
+<!--% scripts %-->
 ```
 
 vs
 
 ```html
-<!--%scripts%-->
+<!--% scripts %-->
 <script type="text/javascript" src="{!URLFOR($Resource.vendors_admin~main_react_dom, 'vendors_admin~main_react_dom.bundle.js')}" ></script>
 <script type="text/javascript" src="{!URLFOR($Resource.main, 'main.bundle.js')}"></script>
-<!--%scripts%-->
+<!--% scripts %-->
 ```

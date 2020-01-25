@@ -4,8 +4,8 @@ const { accumulateFiles } = require('./helper')
 let $;
 
 const configDefaults = {
-    scriptComment: '%scripts%',
-    linkComment: '%css%'
+    scriptComment: '% scripts %',
+    linkComment: '% styles %'
 }
 
 const createNewPage = (data, metaData, staticResourceOpts) => {
@@ -25,16 +25,24 @@ const parseHTML = (page) => {
     return $;
 }
 
+const removeWhiteSpace = (str) => {
+    return str.split(' ').join('');
+}
+
 const modifyHTML = (pluginData, staticResourceOpts) => {
     const { scriptComment, linkComment } = configDefaults;
-    const virtualCommentInfo = queryComment({commentTag: scriptComment});
-    const virtualCssInfo = queryComment({commentTag: linkComment});
+    const commentTagNodeJs = queryComment({commentTag: removeWhiteSpace(scriptComment.trim()) });
+    const commentTagNodeCss = queryComment({commentTag: removeWhiteSpace(linkComment.trim()) });
     const { assets } = pluginData;
     const { css, js } = accumulateFiles(assets);
     //insert script tags
-    generateReferenceTags({ virtualDomInfo: virtualCommentInfo, staticResOpts: staticResourceOpts, files: js, pluginData });
+    if(commentTagNodeJs) {
+        generateReferenceTags({ virtualDomInfo: commentTagNodeJs, staticResOpts: staticResourceOpts, files: js, pluginData });
+    }
     //insert link tags 
-    generateReferenceTags({ virtualDomInfo: virtualCssInfo, staticResOpts: staticResourceOpts, files: css, pluginData });
+    if(commentTagNodeCss) {
+        generateReferenceTags({ virtualDomInfo: commentTagNodeCss, staticResOpts: staticResourceOpts, files: css, pluginData });
+    }
     //return modfied virtualized dom
     return $;
 }
@@ -59,8 +67,13 @@ const staticResHelper = ({ file, staticResourceDir, appendedFileFolders }) => {
 
 const queryComment = ({ commentTag }) => {
     const commentTags = $("*").contents().filter(function () {
-        return this.nodeType === 8 && this.data === commentTag;
+        return this.nodeType === 8 && removeWhiteSpace(this.data.trim()) === commentTag;
     });
+
+    if(!commentTags.length > 0) {
+        console.log(`\nvisualforce-template-webpack-plugin: ${commentTag} was not defined in visualforce page\n`)
+        return;
+    }
     const startingPoint = commentTags[0];
     const endNode = commentTags[0];
     const whiteSpace = (startingPoint.prev && startingPoint.prev.data) ? startingPoint.prev.data : `\n     `;
@@ -94,7 +107,7 @@ const generateReferenceTags = ({ virtualDomInfo, staticResOpts, files, pluginDat
         const { resourceName, resourceFilePath } = staticResHelper({ file, staticResourceDir, appendedFileFolders })
         templateStr += (resourceFilePath.endsWith('.js'))
         ? `${createScriptElement(whiteSpace, resourceName, resourceFilePath, pluginData.scriptHook) + lastOne}`
-        : `${createLinkElement(whiteSpace, resourceName, resourceFilePath, pluginData.linkHook) + lastOne}`;
+        : `${createLinkElement(whiteSpace, resourceName, resourceFilePath, pluginData.styleHook) + lastOne}`;
     }
     $(startingPoint).after(templateStr);
 }
@@ -118,14 +131,14 @@ const createScriptElement = (whiteSpace, resourceName, resourceFilePath, scriptH
     return `\n${whiteSpace}<script ${defaultConfig.async == true ? 'async="async"' : '' } ${defaultConfig.defer == true ? 'defer="defer"' : ''} ${defaultConfig.nomodule == true ? 'nomodule="nomodule"' : ''} type="${defaultConfig.type}" src="${defaultConfig.src}"></script>`;
 };
 
-const createLinkElement = (whiteSpace, resourceName, resourceFilePath, linkHook) => {
+const createLinkElement = (whiteSpace, resourceName, resourceFilePath, styleHook) => {
     let defaultConfig = {
         rel: 'stylesheet',
         href: (resourceName) ? `{!URLFOR($Resource.${resourceName}, '${resourceFilePath}')}` : `{!$Resource.${resourceFilePath.split('.')[0]}}`,
         type: 'text/css'
     };
-    if(linkHook && typeof linkHook == 'function') {
-        let override = linkHook({resourceName, resourceFilePath});
+    if(styleHook && typeof styleHook == 'function') {
+        let override = styleHook({resourceName, resourceFilePath});
         defaultConfig = {
             ...defaultConfig,
             ...override

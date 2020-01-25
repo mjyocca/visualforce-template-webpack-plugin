@@ -4,12 +4,17 @@ const { createNewPage } = require('./dom');
 
 const readFileAsync = (fileName, page, enc) => {
     return new Promise((resolve, reject) => {
-        fs.readFile(fileName, enc, function(err, data){
-            if(err) 
-                reject(err);
-            else 
-                resolve({ fileName, page, data });
-        })
+        if(!fs.existsSync(fileName)) {
+            reject(new Error(`\nVisualforce-Template-Webpack-Plugin: ${page}, does not exist. Incorrect file path for config.\n`))
+        } else {
+            fs.readFile(fileName, enc, function(err, data){
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve({ fileName, page, data });
+                }
+            })
+        }
     })
 }
 
@@ -20,9 +25,11 @@ const readFileAsync = (fileName, page, enc) => {
  const readFiles = (pluginData) => {
     const readAllFiles = pluginData.map((data) => {
         const { page } = data;
-        return readFileAsync(path.resolve(page), page, 'utf8').catch((e) => e);
+        return readFileAsync(path.resolve(page), page, 'utf8')
     })
-    return Promise.all(readAllFiles)
+    return Promise.all(readAllFiles).catch((err) => {
+        console.error(err)
+    })
 }
 
 
@@ -49,7 +56,9 @@ const modifyFiles = (fileObjects, metaDataObjects, staticResInfo) => {
         const currentMetaData = metaDataObjects.find(md => md.page === page);
         return modifyFileAsync(page, data, currentMetaData, staticResInfo)
     })  
-    return Promise.all(modifyAllFiles)
+    return Promise.all(modifyAllFiles).catch((err) => {
+        console.error(err)
+    })
 }
 
 
@@ -72,7 +81,9 @@ const writeFiles = (files) => {
     const writeAllFiles = files.map(({fileName, newPage}) => {
         return writeFileAsync(fileName, newPage);
     })
-    return Promise.all(writeAllFiles)
+    return Promise.all(writeAllFiles).catch((err) => {
+        console.error(err)
+    })
 }
 
 

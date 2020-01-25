@@ -16,7 +16,7 @@
             "descriptions": "Function to hook into modifying src and other attributes on script tag",
             "instanceof": "Function"
         },
-        "linkHook": {
+        "styleHook": {
             "description": "Function to hook into modifying attributes of link tags",
             "instanceof": "Function"
         }

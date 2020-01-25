@@ -1,15 +1,15 @@
 <apex:page>
     <head>
-        <!--%css%-->
+        <!--% styles %-->
         <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.dist, 'main_styles.css')}"/>
-        <!--%css%-->
+        <!--% styles %-->
     </head>
     <div id="root"/>
     <script>
         var item = '{!item}'; 
     </script>
-    <!--%scripts%-->
+    <!--% scripts %-->
     <script type="text/javascript" src="{!URLFOR($Resource.dist, 'vendors_admin~main_react_dom.esm.js')}"/>
     <script type="text/javascript" src="{!URLFOR($Resource.dist, 'main.esm.js')}"/>
-    <!--%scripts%-->
+    <!--% scripts %-->
 </apex:page>
