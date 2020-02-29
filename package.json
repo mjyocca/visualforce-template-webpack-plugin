@@ -1,7 +1,7 @@
 {
   "name": "visualforce-template-webpack-plugin",
   "description": "Webpack plugin that simplifies the updating of Visualforce files to serve your webpack bundles",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "author": {
     "name": "Michael Yocca"
   },
@@ -19,7 +19,8 @@
     "build": "babel src -d build"
   },
   "files": [
-    "build"
+    "build",
+    "schema.json"
   ],
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
