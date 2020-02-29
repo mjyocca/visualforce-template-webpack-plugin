@@ -1,3 +1,5 @@
+const path = require('path');
+
 /**
  * 
  * @param {*} entrypoints - webpack entrypoints object
@@ -111,12 +113,12 @@ const setupConfig = (config, webpackEntryNames) => {
  * @param {*} output - Webpack output from configuration
  */
 const getResourceBundleInfo = (output) => {
-  const {path, filename} = output;
-  const pathArray = path.split('/');
+  const { outputPath, outputFileName } = output;
+  const pathArray = outputPath.split(path.sep);
   const statResIndex = pathArray.findIndex((el) => el == 'staticresources') + 1;
   const staticResourceDir = pathArray[statResIndex];
   const appendedFileFolders = pathArray.splice(statResIndex + 1).join('/');
-  return { staticResourceDir, appendedFileFolders, filename };
+  return { staticResourceDir, appendedFileFolders, outputFileName };
 }
 
 //const isEmptyObj = (obj) => obj && Object.entries(obj).length !== 0;

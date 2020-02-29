@@ -34,7 +34,11 @@ class VisualforceWebpackPlugin {
             const stats = compilation.getStats();
             const { compilation: { entrypoints } } = stats;
 
-            const staticResInfo = getResourceBundleInfo(output);
+            const staticResInfo = getResourceBundleInfo({
+                outputPath: output.path,
+                outputFileName: output.filename
+            });
+    
             const pluginMetaData = createMetaData(this.options,  entrypoints);
 
             const { memoryCache, runMetaData, run } = compareCache(this.cache, pluginMetaData)
