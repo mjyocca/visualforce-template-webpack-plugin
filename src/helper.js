@@ -2,6 +2,14 @@ const path = require('path');
 
 /**
  * 
+ * @description determines if asset js file is the webpack hot update file.
+ */
+const isHotUpdateFile = (fileName) => {
+  return /\.hot-update\.js$/.test(fileName);
+}
+
+/**
+ * 
  * @param {*} entrypoints - webpack entrypoints object
  * @returns returns js and css files for each webpack entry point
  */
@@ -11,7 +19,7 @@ const webpackBundleReducer = (entrypoints) => {
         // check if config has entrypoint configured
           const tempFiles = entrypoint.getFiles()
             .reduce((acc, file) => {
-                if(file.endsWith('.js')) {
+                if(file.endsWith('.js') && !isHotUpdateFile(file)) {
                   acc.js.push(file)
                 } else if(file.endsWith('.css')) {
                   acc.css.push(file)
