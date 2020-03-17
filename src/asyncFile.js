@@ -36,8 +36,8 @@ const readFileAsync = (fileName, page, enc) => {
 const modifyFileAsync = (page, data, metaData, staticResourceOpts) => {
     return new Promise((resolve, reject) => {
         try {
-            const newPage = createNewPage(data, metaData, staticResourceOpts)
-            resolve({ newPage, fileName: page })
+            const { newPage, commitFile } = createNewPage(data, metaData, staticResourceOpts)
+            resolve({ newPage, fileName: page, commitFile })
         } catch(err) {
             reject(err)
         }
@@ -78,7 +78,10 @@ const writeFileAsync = (fileName, data) => {
  * @param {*} files 
  */
 const writeFiles = (files) => {
-    const writeAllFiles = files.map(({fileName, newPage}) => {
+    const writeAllFiles = files
+    // filter out files that commitFile is set to false
+    .filter(({commitFile}) => commitFile === true)
+    .map(({fileName, newPage}) => {
         return writeFileAsync(fileName, newPage);
     })
     return Promise.all(writeAllFiles).catch((err) => {

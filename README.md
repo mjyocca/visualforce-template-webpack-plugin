@@ -1,3 +1,7 @@
+[![Latest Stable Version](https://img.shields.io/npm/v/visualforce-template-webpack-plugin.svg)](https://www.npmjs.com/package/visualforce-template-webpack-plugin)
+[![NPM Downloads](https://img.shields.io/npm/dm/visualforce-template-webpack-plugin.svg)](https://www.npmjs.com/package/visualforce-template-webpack-plugin)
+[![License](https://img.shields.io/github/license/mjyocca/visualforce-template-webpack-plugin.svg)](https://github.com/mjyocca/visualforce-template-webpack-plugin)
+
 # Visualforce Template Webpack Plugin
 
 This is a [Webpack](https://webpack.js.org/) plugin that simplifies the updating of your [Visualforce](https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_intro_what_is_it.htm) pages by automatically including your static resource file(s) references as script and link tags. More about referencing static resource files in Visualforce markup [here](https://developer.salesforce.com/docs/atlas.en-us.pages.meta/pages/pages_resources_reference.htm).

@@ -9,9 +9,15 @@ const configDefaults = {
 }
 
 const createNewPage = (data, metaData, staticResourceOpts) => {
-    let visualforce = parseHTML(data);
-    visualforce = modifyHTML(metaData, staticResourceOpts);
-    return visualforce.html();
+    // parse vf page into ast via cheerio
+    parseHTML(data);
+    // modify ast and determine if we should commit the file
+    const { commitFile } = modifyHTML(metaData, staticResourceOpts);
+    // return modified html and if we should commit to disk
+    return {
+        newPage: $.html(),
+        commitFile
+    };
 }
 
 const parseHTML = (page) => {
@@ -35,16 +41,20 @@ const modifyHTML = (pluginData, staticResourceOpts) => {
     const commentTagNodeCss = queryComment({commentTag: removeWhiteSpace(linkComment.trim()) });
     const { assets } = pluginData;
     const { css, js } = accumulateFiles(assets);
-    //insert script tags
+    // if we found anchor comment tags, insert script tags
     if(commentTagNodeJs) {
         generateReferenceTags({ virtualDomInfo: commentTagNodeJs, staticResOpts: staticResourceOpts, files: js, pluginData });
     }
-    //insert link tags 
+    // if we found anchor comment tags, insert link tags 
     if(commentTagNodeCss) {
         generateReferenceTags({ virtualDomInfo: commentTagNodeCss, staticResOpts: staticResourceOpts, files: css, pluginData });
     }
+
+    const commitFile = (commentTagNodeJs != undefined || commentTagNodeCss != undefined);
     //return modfied virtualized dom
-    return $;
+    return {
+        commitFile: commitFile
+    }
 }
 
 const staticResHelper = ({ file, staticResourceDir, appendedFileFolders }) => {
@@ -66,24 +76,29 @@ const staticResHelper = ({ file, staticResourceDir, appendedFileFolders }) => {
 
 
 const queryComment = ({ commentTag }) => {
-    const commentTags = $("*").contents().filter(function () {
+    const [ startingPoint, endNode ] = $("*").contents().filter(function() {
         return this.nodeType === 8 && removeWhiteSpace(this.data.trim()) === commentTag;
-    });
+    }).toArray();
 
-    if(!commentTags.length > 0) {
-        console.log(`\nvisualforce-template-webpack-plugin: ${commentTag} was not defined in visualforce page\n`)
+    let safeToRun = startingPoint && endNode;
+    
+    if(startingPoint && !endNode) {
+        console.log(`\nvisualforce-template-webpack-plugin: missing the other <!-- ${commentTag} --> comment tag in visualforce page\n`);
         return;
     }
-    const startingPoint = commentTags[0];
-    const endNode = commentTags[0];
-    const whiteSpace = (startingPoint.prev && startingPoint.prev.data) ? startingPoint.prev.data : `\n     `;
+
+    if(!safeToRun) {
+        console.log(`\nvisualforce-template-webpack-plugin: <!-- ${commentTag} --> was not defined in visualforce page\n`)
+        return;
+    }
+    const whiteSpace = (safeToRun && startingPoint.prev && startingPoint.prev.data) ? startingPoint.prev.data : `\n     `;
     return { startingPoint, endNode, whiteSpace }
 }
 
 const getCommentWhiteSpace = (str) => str.substr(str.lastIndexOf('\n') + 1, str.length);
 
 const nextUntil = (nodes, currentNode, endNode) => {
-    if(currentNode.type !== 'comment') {
+    if(currentNode.type !== 'comment' && currentNode !== endNode) {
         nodes.push(currentNode);
         nextUntil(nodes, currentNode.next, endNode);
     }
@@ -150,6 +165,6 @@ const createLinkElement = (whiteSpace, resourceName, resourceFilePath, styleHook
 
 module.exports = { 
     parseHTML, 
-    modifyHTML ,
+    modifyHTML,
     createNewPage
 }
