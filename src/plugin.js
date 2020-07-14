@@ -14,7 +14,7 @@ class VisualforceWebpackPlugin {
         validateOptions(schema, options, {
             name: PLUGIN_NAME,
             baseDataPath: 'options',
-          });
+        });
         this.options = options;
         this.cache = {};
     }
@@ -38,12 +38,12 @@ class VisualforceWebpackPlugin {
                 outputPath: output.path,
                 outputFileName: output.filename
             });
-    
-            const pluginMetaData = createMetaData(this.options,  entrypoints);
+
+            const pluginMetaData = createMetaData(this.options, entrypoints);
 
             const { memoryCache, runMetaData, run } = compareCache(this.cache, pluginMetaData)
 
-            if(run) {
+            if (run) {
                 this.cache = memoryCache;
                 this.dispatchAssets(staticResInfo, runMetaData);
             }
@@ -54,16 +54,16 @@ class VisualforceWebpackPlugin {
     async dispatchAssets(staticResInfo, pluginMetaData) {
         try {
             // read files for each config
-            const fileObjects = await readFiles(pluginMetaData); 
+            const fileObjects = await readFiles(pluginMetaData);
             // modify each file
             const modifiedFiles = await modifyFiles(fileObjects, pluginMetaData, staticResInfo);
             // write files
             await writeFiles(modifiedFiles)
 
-        } catch(err) {
+        } catch (err) {
             console.error(`\n${PLUGIN_NAME} had a runtime error: \n`, err);
         }
-    }   
+    }
 }
 
 

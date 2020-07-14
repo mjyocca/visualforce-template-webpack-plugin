@@ -3,7 +3,7 @@
   "description": "Webpack plugin that simplifies the updating of Visualforce files to serve your webpack bundles",
   "version": "0.0.5",
   "author": {
-    "name": "Michael Yocca"
+    "name": "Michael Yocca @mjyocca"
   },
   "repository": "https://github.com/mjyocca/visualforce-template-webpack-plugin.git",
   "keywords": [
@@ -13,19 +13,33 @@
     "plugin"
   ],
   "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "module": "./build/index.mjs",
+  "exports": {
+    "import": "./build/index.mjs",
+    "require": "./build/index.js"
+  },
   "bugs": "https://github.com/mjyocca/visualforce-template-webpack-plugin/issues",
   "license": "MIT",
   "scripts": {
-    "build": "babel src -d build"
+    "build": "tsc && node ./build-scripts/build.js",
+    "clean": "",
+    "start": "tsc --w"
   },
   "files": [
     "build",
     "schema.json"
   ],
   "dependencies": {
+    "@types/node": "^14.0.23",
+    "@types/webpack": "^4.41.21",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "cheerio": "^1.0.0-rc.3",
+    "eslint": "^7.4.0",
     "schema-utils": "^2.6.1",
-    "tapable": "^1.1.3"
+    "tapable": "^1.1.3",
+    "typescript": "^3.9.6"
   },
   "peerDependencies": {
     "webpack": "^4.0.0"
