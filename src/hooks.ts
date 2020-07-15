@@ -1,10 +1,11 @@
-const { AsyncSeriesWaterfallHook } = require('tapable')
+import { AsyncSeriesWaterfallHook } from 'tapable';
+import * as webpack from 'webpack';
 
 const PluginHookMap = new WeakMap();
 
-function getVisualforceHooks(compilation) {
+export function getVisualforceHooks(compilation: webpack.compilation.Compilation): any {
     let hooks = PluginHookMap.get(compilation)
-    if(!hooks) {
+    if (!hooks) {
         hooks = createPluginHooks();
         PluginHookMap.set(compilation, hooks)
     }
@@ -18,7 +19,3 @@ function createPluginHooks() {
         afterTemplateUpdates: new AsyncSeriesWaterfallHook(['args'])
     };
 }
-
-module.exports = {
-    getVisualforceHooks
-};

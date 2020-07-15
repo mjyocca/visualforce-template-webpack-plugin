@@ -1,5 +1,5 @@
-const cheerio = require('cheerio');
-const { accumulateFiles } = require('./helper')
+import cheerio from 'cheerio';
+import { accumulateFiles } from './helper';
 
 let $;
 
@@ -8,7 +8,7 @@ const configDefaults = {
     linkComment: '% styles %'
 }
 
-const createNewPage = (data, metaData, staticResourceOpts) => {
+export const createNewPage = (data, metaData, staticResourceOpts) => {
     // parse vf page into ast via cheerio
     parseHTML(data);
     // modify ast and determine if we should commit the file
@@ -20,7 +20,7 @@ const createNewPage = (data, metaData, staticResourceOpts) => {
     };
 }
 
-const parseHTML = (page) => {
+export const parseHTML = (page) => {
     $ = cheerio.load(page, {
         decodeEntities: false,
         lowerCaseTags: false,
@@ -35,18 +35,18 @@ const removeWhiteSpace = (str) => {
     return str.split(' ').join('');
 }
 
-const modifyHTML = (pluginData, staticResourceOpts) => {
+export const modifyHTML = (pluginData, staticResourceOpts) => {
     const { scriptComment, linkComment } = configDefaults;
-    const commentTagNodeJs = queryComment({commentTag: removeWhiteSpace(scriptComment.trim()) });
-    const commentTagNodeCss = queryComment({commentTag: removeWhiteSpace(linkComment.trim()) });
+    const commentTagNodeJs = queryComment({ commentTag: removeWhiteSpace(scriptComment.trim()) });
+    const commentTagNodeCss = queryComment({ commentTag: removeWhiteSpace(linkComment.trim()) });
     const { assets } = pluginData;
     const { css, js } = accumulateFiles(assets);
     // if we found anchor comment tags, insert script tags
-    if(commentTagNodeJs) {
+    if (commentTagNodeJs) {
         generateReferenceTags({ virtualDomInfo: commentTagNodeJs, staticResOpts: staticResourceOpts, files: js, pluginData });
     }
     // if we found anchor comment tags, insert link tags 
-    if(commentTagNodeCss) {
+    if (commentTagNodeCss) {
         generateReferenceTags({ virtualDomInfo: commentTagNodeCss, staticResOpts: staticResourceOpts, files: css, pluginData });
     }
 
@@ -62,7 +62,7 @@ const staticResHelper = ({ file, staticResourceDir, appendedFileFolders }) => {
     let resourceName;
     let resourceFilePath = file;
     //if static resource directory name is undefined from path //split the file name and set first directory as resource name
-    if(!staticResourceDir && splitFileArray.length > 1){
+    if (!staticResourceDir && splitFileArray.length > 1) {
         const splitFileArray = file.split('/');
         resourceName = splitFileArray.shift();
         resourceFilePath = splitFileArray.join('/');
@@ -70,24 +70,24 @@ const staticResHelper = ({ file, staticResourceDir, appendedFileFolders }) => {
         resourceName = staticResourceDir;
     }
     //nested folder structure add to script file name path
-    if(appendedFileFolders) resourceFilePath = `${appendedFileFolders}/${resourceFilePath}`;
+    if (appendedFileFolders) resourceFilePath = `${appendedFileFolders}/${resourceFilePath}`;
     return { resourceName, resourceFilePath }
 };
 
 
 const queryComment = ({ commentTag }) => {
-    const [ startingPoint, endNode ] = $("*").contents().filter(function() {
+    const [startingPoint, endNode] = $("*").contents().filter(function () {
         return this.nodeType === 8 && removeWhiteSpace(this.data.trim()) === commentTag;
     }).toArray();
 
-    let safeToRun = startingPoint && endNode;
-    
-    if(startingPoint && !endNode) {
+    const safeToRun = startingPoint && endNode;
+
+    if (startingPoint && !endNode) {
         console.log(`\nvisualforce-template-webpack-plugin: missing the other <!-- ${commentTag} --> comment tag in visualforce page\n`);
         return;
     }
 
-    if(!safeToRun) {
+    if (!safeToRun) {
         console.log(`\nvisualforce-template-webpack-plugin: <!-- ${commentTag} --> was not defined in visualforce page\n`)
         return;
     }
@@ -98,7 +98,7 @@ const queryComment = ({ commentTag }) => {
 const getCommentWhiteSpace = (str) => str.substr(str.lastIndexOf('\n') + 1, str.length);
 
 const nextUntil = (nodes, currentNode, endNode) => {
-    if(currentNode.type !== 'comment' && currentNode !== endNode) {
+    if (currentNode.type !== 'comment' && currentNode !== endNode) {
         nodes.push(currentNode);
         nextUntil(nodes, currentNode.next, endNode);
     }
@@ -107,7 +107,7 @@ const nextUntil = (nodes, currentNode, endNode) => {
 const removePrevTextNodes = (startNode, endNode) => {
     const nodes = [];
     nextUntil(nodes, startNode.next, endNode);
-    for(const [i, node] of nodes.entries()) {
+    for (const [i, node] of nodes.entries()) {
         $(node).remove();
     }
 }
@@ -117,12 +117,12 @@ const generateReferenceTags = ({ virtualDomInfo, staticResOpts, files, pluginDat
     const { staticResourceDir, appendedFileFolders } = staticResOpts;
     removePrevTextNodes(startingPoint, endNode);
     let templateStr = '';
-    for(const [index, file] of files.entries()) {
+    for (const [index, file] of files.entries()) {
         const lastOne = files.length === index + 1 ? `\n${getCommentWhiteSpace(whiteSpace)}` : '';
         const { resourceName, resourceFilePath } = staticResHelper({ file, staticResourceDir, appendedFileFolders })
         templateStr += (resourceFilePath.endsWith('.js'))
-        ? `${createScriptElement(whiteSpace, resourceName, resourceFilePath, pluginData.scriptHook) + lastOne}`
-        : `${createLinkElement(whiteSpace, resourceName, resourceFilePath, pluginData.styleHook) + lastOne}`;
+            ? `${createScriptElement(whiteSpace, resourceName, resourceFilePath, pluginData.scriptHook) + lastOne}`
+            : `${createLinkElement(whiteSpace, resourceName, resourceFilePath, pluginData.styleHook) + lastOne}`;
     }
     $(startingPoint).after(templateStr);
 }
@@ -135,15 +135,15 @@ const createScriptElement = (whiteSpace, resourceName, resourceFilePath, scriptH
         src: (resourceName) ? `{!URLFOR($Resource.${resourceName}, '${resourceFilePath}')}` : `{!$Resource.${resourceFilePath.split('.')[0]}}`,
         type: "text/javascript"
     };
-    if(scriptHook && typeof scriptHook == 'function') {
-        let override = scriptHook({resourceName, resourceFilePath});
+    if (scriptHook && typeof scriptHook == 'function') {
+        const override = scriptHook({ resourceName, resourceFilePath });
         defaultConfig = {
             ...defaultConfig,
             ...override
         };
     }
     whiteSpace = getCommentWhiteSpace(whiteSpace);
-    return `\n${whiteSpace}<script ${defaultConfig.async == true ? 'async="async"' : '' } ${defaultConfig.defer == true ? 'defer="defer"' : ''} ${defaultConfig.nomodule == true ? 'nomodule="nomodule"' : ''} type="${defaultConfig.type}" src="${defaultConfig.src}"></script>`;
+    return `\n${whiteSpace}<script ${defaultConfig.async == true ? 'async="async"' : ''} ${defaultConfig.defer == true ? 'defer="defer"' : ''} ${defaultConfig.nomodule == true ? 'nomodule="nomodule"' : ''} type="${defaultConfig.type}" src="${defaultConfig.src}"></script>`;
 };
 
 const createLinkElement = (whiteSpace, resourceName, resourceFilePath, styleHook) => {
@@ -152,8 +152,8 @@ const createLinkElement = (whiteSpace, resourceName, resourceFilePath, styleHook
         href: (resourceName) ? `{!URLFOR($Resource.${resourceName}, '${resourceFilePath}')}` : `{!$Resource.${resourceFilePath.split('.')[0]}}`,
         type: 'text/css'
     };
-    if(styleHook && typeof styleHook == 'function') {
-        let override = styleHook({resourceName, resourceFilePath});
+    if (styleHook && typeof styleHook == 'function') {
+        const override = styleHook({ resourceName, resourceFilePath });
         defaultConfig = {
             ...defaultConfig,
             ...override
@@ -162,9 +162,3 @@ const createLinkElement = (whiteSpace, resourceName, resourceFilePath, styleHook
     whiteSpace = getCommentWhiteSpace(whiteSpace);
     return `\n${whiteSpace}<link rel="${defaultConfig.rel}" type="${defaultConfig.type}" href="${defaultConfig.href}" />`;
 };
-
-module.exports = { 
-    parseHTML, 
-    modifyHTML,
-    createNewPage
-}
